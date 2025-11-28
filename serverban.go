@@ -12,10 +12,10 @@ type ServerBan struct {
 // Add adds a ban
 func (sb *ServerBan) Add(name, banType, duration, reason string) (interface{}, error) {
 	result, err := sb.querier.Query("server_ban.add", map[string]interface{}{
-		"name":             name,
-		"type":             banType,
-		"reason":           reason,
-		"duration_string":  duration,
+		"name":            name,
+		"type":            banType,
+		"reason":          reason,
+		"duration_string": duration,
 	}, false)
 	if err != nil {
 		return nil, err
@@ -62,7 +62,7 @@ func (sb *ServerBan) GetAll() (interface{}, error) {
 		}
 	}
 
-	return nil, errors.New("Invalid JSON Response from UnrealIRCd RPC")
+	return nil, errors.New("invalid JSON response from UnrealIRCd RPC")
 }
 
 // Get gets a specific ban

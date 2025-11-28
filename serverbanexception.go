@@ -68,7 +68,7 @@ func (sbe *ServerBanException) GetAll() (interface{}, error) {
 		}
 	}
 
-	return nil, errors.New("Invalid JSON Response from UnrealIRCd RPC")
+	return nil, errors.New("invalid JSON response from UnrealIRCd RPC")
 }
 
 // Get gets a specific ban exception
