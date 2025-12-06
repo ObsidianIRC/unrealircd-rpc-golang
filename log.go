@@ -37,3 +37,23 @@ func (l *Log) GetAll(sources []string) (interface{}, error) {
 
 	return nil, nil
 }
+
+// Send sends a log message to the IRC server.
+// Requires UnrealIRCd 6.1.8 or later.
+// Parameters:
+//   - msg: The human-readable log message
+//   - level: Log level (info, advice, warn, debug, error, fatal)
+//   - subsystem: A subsystem identifier (e.g., "webpanel")
+//   - eventID: A unique event identifier (e.g., "WEBPANEL_LOGIN")
+func (l *Log) Send(msg, level, subsystem, eventID string) (bool, error) {
+	_, err := l.querier.Query("log.send", map[string]interface{}{
+		"msg":       msg,
+		"level":     level,
+		"subsystem": subsystem,
+		"event_id":  eventID,
+	}, false)
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+}
