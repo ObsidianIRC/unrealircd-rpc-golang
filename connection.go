@@ -117,6 +117,8 @@ func (c *Connection) Query(method string, params interface{}, noWait bool) (inte
 			c.mu.Lock()
 			c.conn.SetReadDeadline(time.Now().Add(10 * time.Second))
 			_, message, err := c.conn.ReadMessage()
+	// Clear the deadline after reading to prevent gorilla/websocket from entering failed state
+	c.conn.SetReadDeadline(time.Time{})
 			c.mu.Unlock()
 			if err != nil {
 				return nil, err
@@ -153,6 +155,8 @@ func (c *Connection) EventLoop() (interface{}, error) {
 	c.mu.Lock()
 	c.conn.SetReadDeadline(time.Now().Add(2 * time.Second))
 	_, message, err := c.conn.ReadMessage()
+	// Clear the deadline after reading to prevent gorilla/websocket from entering failed state
+	c.conn.SetReadDeadline(time.Time{})
 	c.mu.Unlock()
 	if err != nil {
 		if netErr, ok := err.(interface{ Timeout() bool }); ok && netErr.Timeout() {
