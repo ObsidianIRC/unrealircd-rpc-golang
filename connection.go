@@ -117,8 +117,6 @@ func (c *Connection) Query(method string, params interface{}, noWait bool) (inte
 			c.mu.Lock()
 			c.conn.SetReadDeadline(time.Now().Add(10 * time.Second))
 			_, message, err := c.conn.ReadMessage()
-	// Clear the deadline after reading to prevent gorilla/websocket from entering failed state
-	c.conn.SetReadDeadline(time.Time{})
 			c.mu.Unlock()
 			if err != nil {
 				return nil, err
@@ -151,42 +149,65 @@ func (c *Connection) Query(method string, params interface{}, noWait bool) (inte
 }
 
 // EventLoop waits for the next event (used for log streaming)
+// Returns nil, nil on timeout (caller can retry)
+// This implementation uses a blocking read and channel-based timeout
+// to avoid gorilla/websocket readErrCount issue after deadline timeout
 func (c *Connection) EventLoop() (interface{}, error) {
-	c.mu.Lock()
-	c.conn.SetReadDeadline(time.Now().Add(2 * time.Second))
-	_, message, err := c.conn.ReadMessage()
-	// Clear the deadline after reading to prevent gorilla/websocket from entering failed state
-	c.conn.SetReadDeadline(time.Time{})
-	c.mu.Unlock()
-	if err != nil {
-		if netErr, ok := err.(interface{ Timeout() bool }); ok && netErr.Timeout() {
-			return nil, nil // timeout, can retry
+	type readResult struct {
+		message []byte
+		err     error
+	}
+
+	resultCh := make(chan readResult, 1)
+
+	// Start a goroutine that does a blocking read
+	go func() {
+		c.mu.Lock()
+		// Clear any previous deadline to allow blocking read
+		c.conn.SetReadDeadline(time.Time{})
+		_, message, err := c.conn.ReadMessage()
+		c.mu.Unlock()
+		select {
+		case resultCh <- readResult{message, err}:
+		default:
+			// Channel full, caller timed out already
 		}
-		return nil, err
-	}
+	}()
 
-	var resp map[string]interface{}
-	if err := json.Unmarshal(message, &resp); err != nil {
-		return nil, err
-	}
-
-	if result, ok := resp["result"]; ok {
-		c.errno = 0
-		c.err = nil
-		return result, nil
-	}
-
-	if errObj, ok := resp["error"].(map[string]interface{}); ok {
-		if code, ok := errObj["code"].(float64); ok {
-			c.errno = int(code)
+	// Wait for result with timeout
+	select {
+	case res := <-resultCh:
+		if res.err != nil {
+			return nil, res.err
 		}
-		if msg, ok := errObj["message"].(string); ok {
-			c.err = errors.New(msg)
-		}
-		return nil, c.err
-	}
 
-	return nil, errors.New("Invalid JSON-RPC data from UnrealIRCd: not an error and not a result")
+		var resp map[string]interface{}
+		if err := json.Unmarshal(res.message, &resp); err != nil {
+			return nil, err
+		}
+
+		if result, ok := resp["result"]; ok {
+			c.errno = 0
+			c.err = nil
+			return result, nil
+		}
+
+		if errObj, ok := resp["error"].(map[string]interface{}); ok {
+			if code, ok := errObj["code"].(float64); ok {
+				c.errno = int(code)
+			}
+			if msg, ok := errObj["message"].(string); ok {
+				c.err = errors.New(msg)
+			}
+			return nil, c.err
+		}
+
+		return nil, errors.New("Invalid JSON-RPC data from UnrealIRCd: not an error and not a result")
+
+	case <-time.After(10 * time.Second):
+		// Timeout - the goroutine is still waiting for data
+		return nil, nil
+	}
 }
 
 // Errno returns the last error code
