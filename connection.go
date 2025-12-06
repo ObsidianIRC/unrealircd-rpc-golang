@@ -19,12 +19,12 @@ type Querier interface {
 
 // Connection represents a connection to the UnrealIRCd RPC server
 type Connection struct {
-	conn     *websocket.Conn
-	mu       sync.Mutex
-	errno    int
-	err      error
-	nextID   int
-	idMu     sync.Mutex
+	conn   *websocket.Conn
+	mu     sync.Mutex
+	errno  int
+	err    error
+	nextID int
+	idMu   sync.Mutex
 }
 
 // Options for connecting to the RPC server
@@ -243,4 +243,14 @@ func (c *Connection) Log() *Log {
 // ServerBanException returns the server ban exception handler
 func (c *Connection) ServerBanException() *ServerBanException {
 	return &ServerBanException{querier: c}
+}
+
+// Close closes the underlying WebSocket connection
+func (c *Connection) Close() error {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	if c.conn != nil {
+		return c.conn.Close()
+	}
+	return nil
 }
