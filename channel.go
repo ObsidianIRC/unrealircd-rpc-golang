@@ -78,3 +78,25 @@ func (c *Channel) Kick(channel, nick, reason string) (interface{}, error) {
 		"reason":  reason,
 	}, false)
 }
+
+// Create creates a new channel with optional modes, parameters and topic.
+// It calls the RPC method "channel.create" with params: channel, modes, parameters, topic, set_by, set_at.
+func (c *Channel) Create(channelName, modes, parameters, topic string, setBy, setAt *string) (interface{}, error) {
+	params := map[string]interface{}{"channel": channelName}
+	if modes != "" {
+		params["modes"] = modes
+	}
+	if parameters != "" {
+		params["parameters"] = parameters
+	}
+	if topic != "" {
+		params["topic"] = topic
+	}
+	if setBy != nil {
+		params["set_by"] = *setBy
+	}
+	if setAt != nil {
+		params["set_at"] = *setAt
+	}
+	return c.querier.Query("channel.create", params, false)
+}

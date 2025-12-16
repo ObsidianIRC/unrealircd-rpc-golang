@@ -89,3 +89,22 @@ func TestChannel_Kick(t *testing.T) {
 		t.Errorf("Expected 'ok', got %v", result)
 	}
 }
+
+func TestChannel_Create(t *testing.T) {
+	mock := &mockQuerier{
+		expectedMethod: "channel.create",
+		response: map[string]interface{}{
+			"channel": map[string]interface{}{"name": "#newchannel"},
+		},
+	}
+	channel := &Channel{querier: mock}
+
+	setBy := "admin"
+	result, err := channel.Create("#newchannel", "+nt", "", "Welcome", &setBy, nil)
+	if err != nil {
+		t.Fatalf("Expected no error, got %v", err)
+	}
+	if result == nil {
+		t.Fatal("Expected channel object, got nil")
+	}
+}
