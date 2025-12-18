@@ -145,3 +145,74 @@ The `Query` method parameters are:
 - `noWait`: If true, sends the request but doesn't wait for a response (bool)
 
 All responses are returned as `interface{}`, which you can type-assert to the expected type (usually `map[string]interface{}` for objects or `[]interface{}` for arrays).
+
+## Server convenience methods 🔧
+
+The library provides a set of convenience wrappers for common server-related JSON-RPC methods via `conn.Server()`.
+
+- **Rehash**
+  - Signature: `Rehash(server *string) (interface{}, error)`
+  - Description: Ask a server to perform a rehash. The result can be a boolean (for remote servers that do not support RPC) or an object with full rehash details (`rehash_client`, `success`, `log`).
+  - Example:
+
+```go
+res, err := conn.Server().Rehash(nil) // or: serverName := "irc1.example.net"; res, err := conn.Server().Rehash(&serverName)
+if err != nil {
+    log.Fatal(err)
+}
+fmt.Printf("Rehash result: %#v\n", res)
+```
+
+- **Connect**
+  - Signature: `Connect(link string) (bool, error)`
+  - Description: Request the connected server to make a server link to another server. Returns `true` on success.
+  - Example:
+
+```go
+ok, err := conn.Server().Connect("irc2.example.net")
+if err != nil { log.Fatal(err) }
+if ok { fmt.Println("Connect request succeeded") }
+```
+
+- **Disconnect**
+  - Signature: `Disconnect(link string) (bool, error)`
+  - Description: Terminate a server link. Returns `true` on success.
+  - Example:
+
+```go
+ok, err := conn.Server().Disconnect("irc2.example.net")
+if err != nil { log.Fatal(err) }
+if ok { fmt.Println("Disconnect request succeeded") }
+```
+
+- **ModuleList**
+  - Signature: `ModuleList(server *string) (interface{}, error)`
+  - Description: Retrieve the list of loaded modules on a server. Returns the module list (often `[]interface{}`) or the raw response object when appropriate.
+  - Example:
+
+```go
+mods, err := conn.Server().ModuleList(nil)
+if err != nil { log.Fatal(err) }
+fmt.Printf("Modules: %#v\n", mods)
+```
+
+- **ConfigTest**
+  - Signature: `ConfigTest() (map[string]interface{}, error)`
+  - Description: Run a configuration test on the server and return the full test object (`success`, `exit_code`, `stdout`, `stderr`).
+  - Example:
+
+```go
+res, err := conn.Server().ConfigTest()
+if err != nil { log.Fatal(err) }
+fmt.Printf("Config test: %#v\n", res)
+```
+
+### Tests ✅
+
+Unit tests for these wrappers are provided in `server_extra_test.go`. You can run the full test suite with:
+
+```bash
+go test ./...
+```
+
+All tests (including the new server tests) pass locally.
