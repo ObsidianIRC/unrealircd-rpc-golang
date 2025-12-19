@@ -66,7 +66,7 @@ func TestMessageStandardReply(t *testing.T) {
 
 func TestMessageWallops(t *testing.T) {
 	mock := &mockQuerier{
-		expectedMethod: "message.wallops",
+		expectedMethod: "message.send_wallops",
 		response:       true,
 	}
 	msg := &Message{querier: mock}
@@ -81,7 +81,7 @@ func TestMessageWallops(t *testing.T) {
 
 func TestMessageGlobops(t *testing.T) {
 	mock := &mockQuerier{
-		expectedMethod: "message.globops",
+		expectedMethod: "message.send_globops",
 		response:       true,
 	}
 	msg := &Message{querier: mock}
