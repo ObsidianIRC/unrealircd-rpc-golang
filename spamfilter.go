@@ -12,12 +12,12 @@ type Spamfilter struct {
 // Add adds a spamfilter
 func (sf *Spamfilter) Add(name, matchType, spamfilterTargets, banAction, banDuration, reason string) (interface{}, error) {
 	result, err := sf.querier.Query("spamfilter.add", map[string]interface{}{
-		"name":                name,
-		"match_type":          matchType,
-		"spamfilter_targets":  spamfilterTargets,
-		"ban_action":          banAction,
-		"ban_duration":        banDuration,
-		"reason":              reason,
+		"name":               name,
+		"match_type":         matchType,
+		"spamfilter_targets": spamfilterTargets,
+		"ban_action":         banAction,
+		"ban_duration":       banDuration,
+		"reason":             reason,
 	}, false)
 	if err != nil {
 		return nil, err

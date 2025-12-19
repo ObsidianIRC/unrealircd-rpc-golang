@@ -12,8 +12,8 @@ type NameBan struct {
 // Add adds a name ban (QLine)
 func (nb *NameBan) Add(name, reason string, duration, setBy *string) (interface{}, error) {
 	params := map[string]interface{}{
-		"name":    name,
-		"reason":  reason,
+		"name":            name,
+		"reason":          reason,
 		"duration_string": "0",
 	}
 	if duration != nil {

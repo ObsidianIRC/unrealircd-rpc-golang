@@ -12,9 +12,9 @@ type ServerBanException struct {
 // Add adds a ban exception
 func (sbe *ServerBanException) Add(name, exceptionTypes, reason string, setBy, duration *string) (interface{}, error) {
 	params := map[string]interface{}{
-		"name":             name,
-		"exception_types":  exceptionTypes,
-		"reason":           reason,
+		"name":            name,
+		"exception_types": exceptionTypes,
+		"reason":          reason,
 	}
 	if setBy != nil {
 		params["set_by"] = *setBy
