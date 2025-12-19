@@ -5,10 +5,11 @@ type Message struct {
 	querier Querier
 }
 
-// Privmsg sends a PRIVMSG to a user
-func (m *Message) Privmsg(nick, message string) (interface{}, error) {
+// Privmsg sends a PRIVMSG to a target (nick, channel, or multiple targets)
+// target may be a string (single target) or []string (multiple targets)
+func (m *Message) Privmsg(target interface{}, message string) (interface{}, error) {
 	result, err := m.querier.Query("message.privmsg", map[string]interface{}{
-		"nick":    nick,
+		"target":  target,
 		"message": message,
 	}, false)
 	if err != nil {
@@ -17,10 +18,11 @@ func (m *Message) Privmsg(nick, message string) (interface{}, error) {
 	return result, nil
 }
 
-// Notice sends a NOTICE to a user
-func (m *Message) Notice(nick, message string) (interface{}, error) {
+// Notice sends a NOTICE to a target (nick, channel, or multiple targets)
+// target may be a string (single target) or []string (multiple targets)
+func (m *Message) Notice(target interface{}, message string) (interface{}, error) {
 	result, err := m.querier.Query("message.notice", map[string]interface{}{
-		"nick":    nick,
+		"target":  target,
 		"message": message,
 	}, false)
 	if err != nil {
@@ -62,7 +64,7 @@ func (m *Message) StandardReply(nick, replyType, code, description string, conte
 
 // Wallops sends a WALLOPS (server-wide admin message)
 func (m *Message) Wallops(message string) (interface{}, error) {
-	result, err := m.querier.Query("message.wallops", map[string]interface{}{"message": message}, false)
+	result, err := m.querier.Query("message.send_wallops", map[string]interface{}{"message": message}, false)
 	if err != nil {
 		return nil, err
 	}
@@ -71,7 +73,7 @@ func (m *Message) Wallops(message string) (interface{}, error) {
 
 // Globops sends a GLOBOPS (global operator message)
 func (m *Message) Globops(message string) (interface{}, error) {
-	result, err := m.querier.Query("message.globops", map[string]interface{}{"message": message}, false)
+	result, err := m.querier.Query("message.send_globops", map[string]interface{}{"message": message}, false)
 	if err != nil {
 		return nil, err
 	}
