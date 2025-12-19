@@ -59,3 +59,21 @@ func (m *Message) StandardReply(nick, replyType, code, description string, conte
 	}
 	return result, nil
 }
+
+// Wallops sends a WALLOPS (server-wide admin message)
+func (m *Message) Wallops(message string) (interface{}, error) {
+	result, err := m.querier.Query("message.wallops", map[string]interface{}{"message": message}, false)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+// Globops sends a GLOBOPS (global operator message)
+func (m *Message) Globops(message string) (interface{}, error) {
+	result, err := m.querier.Query("message.globops", map[string]interface{}{"message": message}, false)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}

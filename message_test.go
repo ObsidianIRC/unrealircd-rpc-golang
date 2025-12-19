@@ -63,3 +63,33 @@ func TestMessageStandardReply(t *testing.T) {
 		t.Error("Query was not called")
 	}
 }
+
+func TestMessageWallops(t *testing.T) {
+	mock := &mockQuerier{
+		expectedMethod: "message.wallops",
+		response:       true,
+	}
+	msg := &Message{querier: mock}
+	_, err := msg.Wallops("test wallops")
+	if err != nil {
+		t.Errorf("Wallops failed: %v", err)
+	}
+	if !mock.called {
+		t.Error("Query was not called")
+	}
+}
+
+func TestMessageGlobops(t *testing.T) {
+	mock := &mockQuerier{
+		expectedMethod: "message.globops",
+		response:       true,
+	}
+	msg := &Message{querier: mock}
+	_, err := msg.Globops("test globops")
+	if err != nil {
+		t.Errorf("Globops failed: %v", err)
+	}
+	if !mock.called {
+		t.Error("Query was not called")
+	}
+}
