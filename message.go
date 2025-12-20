@@ -8,7 +8,7 @@ type Message struct {
 // Privmsg sends a PRIVMSG to a target (nick, channel, or multiple targets)
 // target may be a string (single target) or []string (multiple targets)
 func (m *Message) Privmsg(target interface{}, message string) (interface{}, error) {
-	result, err := m.querier.Query("message.privmsg", map[string]interface{}{
+	result, err := m.querier.Query("message.send_privmsg", map[string]interface{}{
 		"target":  target,
 		"message": message,
 	}, false)
@@ -21,7 +21,7 @@ func (m *Message) Privmsg(target interface{}, message string) (interface{}, erro
 // Notice sends a NOTICE to a target (nick, channel, or multiple targets)
 // target may be a string (single target) or []string (multiple targets)
 func (m *Message) Notice(target interface{}, message string) (interface{}, error) {
-	result, err := m.querier.Query("message.notice", map[string]interface{}{
+	result, err := m.querier.Query("message.send_notice", map[string]interface{}{
 		"target":  target,
 		"message": message,
 	}, false)
@@ -33,7 +33,7 @@ func (m *Message) Notice(target interface{}, message string) (interface{}, error
 
 // Numeric sends a custom numeric message to a user
 func (m *Message) Numeric(nick string, numeric int, message string) (interface{}, error) {
-	result, err := m.querier.Query("message.numeric", map[string]interface{}{
+	result, err := m.querier.Query("message.send_numeric", map[string]interface{}{
 		"nick":    nick,
 		"numeric": numeric,
 		"message": message,
